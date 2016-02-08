@@ -1,3 +1,7 @@
+dag.dot
+dag.pdf
+exectime.json
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
