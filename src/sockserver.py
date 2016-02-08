@@ -15,6 +15,8 @@ class SockServer(object):
         listen_sock.listen(10000)
         if pipe:
             pipe.put(listen_sock.getsockname()[1])
+        else:
+            print listen_sock.getsockname()
         while True:
             sock, _ = listen_sock.accept()
             gevent.spawn(self.handle_let, sock)

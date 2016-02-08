@@ -3,7 +3,7 @@ import gipc
 import Husky
 from sockserver import SockServer, SockClient
 from worker import Puppet
-
+from sh import lxc
 
 class ServiceBase(object):
     def __init__(self, s_id, conf):
@@ -12,7 +12,7 @@ class ServiceBase(object):
         self.start_time = None
         self.finish_time = None
 
-    def start(self):
+    def start(self, **kwargs):
         self.start_time = time.time()
 
     def terminate(self):
@@ -65,3 +65,38 @@ class LocalService(ServiceBase):
             return self.puppet.current_tasks()
         elif item == "status":
             return self.puppet.get_attr("status")
+
+
+class LocalLXCService(ServiceBase):
+
+    def __init__(self, s_id, conf):
+        super(LocalLXCService, self).__init__(s_id, conf)
+        self.puppet = None
+        self.name = "brick-%s" % self.s_id
+
+    def get_ip(self, nic="eth0"):
+        info = lxc.info(self.name)
+        port = None
+        if nic in info:
+            for line in lxc.info(self.name).splitlines():
+                if nic in line:
+                    port = line.split()[-2]
+                    break
+            return port
+        else:
+            time.sleep(0.5)
+            return self.get_ip(nic)
+
+    def start(self, image):
+        lxc.launch(image, self.name, p=self.conf)
+        print self.get_ip()
+
+    def terminate(self):
+        lxc.delete(self.name)
+
+
+if __name__ == '__main__':
+    c = LocalLXCService(0, "tiny")
+    c.start("t0")
+
+    c.terminate()

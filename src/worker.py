@@ -50,3 +50,7 @@ class Puppet(object):
 
     def current_tasks(self):
         return self.results.keys()
+
+if __name__ == '__main__':
+    from sockserver import SockServer
+    SockServer(Puppet).run()

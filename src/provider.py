@@ -10,7 +10,7 @@ class ProviderBase(object):
 
     def start_service(self, s_id, s_type, **kwargs):
         self.services[s_id] = self._service_class_(s_id, s_type, **kwargs)
-        self.services[s_id].start()
+        self.services[s_id].start(**kwargs)
         return self.services[s_id]
 
     def stop_service(self, service):
