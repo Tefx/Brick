@@ -1,8 +1,6 @@
-from gevent import monkey;monkey.patch_all()
-from workflow import Workflow
 from engine import *
 from provider import *
-import time
+from workflow import Workflow
 
 
 def test_diamond():
@@ -10,36 +8,36 @@ def test_diamond():
 
     @w.create_task()
     def start_task(x):
-        time.sleep(10)
+        time.sleep(5)
         return x + 3
 
     @w.create_task()
     def mid_task(x):
-        time.sleep(10)
+        time.sleep(5)
         return x + 42
 
     @w.create_task()
     def final(x, y, z):
-        time.sleep(10)
+        time.sleep(5)
         return x * y + z
 
     y = start_task(1)
     res = final(mid_task(y), mid_task(y), mid_task(y))
     w.save("dag.dot")
 
-    p = LocalProvider()
-    e = LocalFixedEngine(p, 4)
+    # p = LocalProcessProvider()
+    p = LocalLXCProvider()
+    e = LocalFixedEngine(p, 3)
 
     st = time.time()
     e.start_with_server(w)
     ft = time.time()
 
-    print w.dump_time("exectime.json")
+    w.dump_time("exectime.json")
 
-    print res.value
-    print res.metadata
-    print p.total_cost()
-    print ft - st
+    print "Result:", res.value
+    print "Cost:", p.total_cost()
+    print "Makespan:", ft - st
 
 
 def test_meta_merge():
@@ -62,8 +60,8 @@ def test_meta_merge():
     c = final(b)
 
     w.save("dag.dot")
-    p = LocalProvider()
-    e = LocalSingleEngine(p)
+    p = LocalProcessProvider()
+    e = LocalFixedEngine(p, 2)
     e.start(w)
 
     e.join()

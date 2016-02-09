@@ -1,16 +1,18 @@
-from service import LocalService
 import gevent
+
+from service import *
 
 
 class ProviderBase(object):
     _service_class_ = NotImplemented
+    _config_ = NotImplemented
 
     def __init__(self):
         self.services = {}
 
-    def start_service(self, s_id, s_type, **kwargs):
-        self.services[s_id] = self._service_class_(s_id, s_type, **kwargs)
-        self.services[s_id].start(**kwargs)
+    def start_service(self, s_id, s_type):
+        self.services[s_id] = self._service_class_(s_id, s_type)
+        # self.services[s_id].start()
         return self.services[s_id]
 
     def stop_service(self, service):
@@ -34,27 +36,30 @@ class ProviderBase(object):
             self.stop_service(s)
 
     def configurations(self):
-        raise NotImplementedError
+        return self._config_.keys()
 
-    def get_config(self, name):
-        raise NotImplementedError
+    def get_config(self, conf):
+        return self._config_[conf]
 
     def calculate_price(self, service):
         raise NotImplementedError
 
     def quota(self):
-        raise NotImplementedError
+        raise None
 
 
-class LocalProvider(ProviderBase):
+class LocalProcessProvider(ProviderBase):
     _service_class_ = LocalService
-    _config_ = {"local": {"price": lambda _: 0, "cpu_scale": 1}}
+    _config_ = {"local": {"cpu_scale": 1}}
 
-    def configurations(self):
-        return self._config_.keys()
+    def calculate_price(self, service):
+        return 0
 
-    def get_config(self, conf):
-        return self._config_[conf]
+
+class LocalLXCProvider(ProviderBase):
+    _service_class_ = LocalLXCService
+    _config_ = {"tiny": {"cpu_scale": 1},
+                "small": {"cpu_scale": 2}}
 
     def calculate_price(self, service):
         return 0
@@ -64,8 +69,12 @@ if __name__ == '__main__':
         gevent.sleep(3)
         return x+42
 
-    provider = LocalProvider()
-    provider.start_service(0, "only")
+
+    # provider = LocalProcessProvider()
+    provider = LocalLXCProvider()
+    s = provider.start_service(0, "tiny")
+    if not s.started:
+        s.start()
     service = provider.get_service(0)
 
     let = gevent.spawn(service.run, "test", long_run, 10)

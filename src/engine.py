@@ -1,7 +1,9 @@
+import copy
+import gevent
+import gevent.lock
 import gevent.pool
 import gevent.queue
-import gevent
-import copy
+
 from sockserver import SockServer
 
 
@@ -20,6 +22,7 @@ class EngineBase(object):
         self.provider = provider
         self.ready = set()
         self.greenlets = gevent.pool.Group()
+        self.lock = gevent.lock.Semaphore()
 
     def start(self, workflow):
         self.dag = workflow.dag
@@ -36,10 +39,15 @@ class EngineBase(object):
         ts = copy.copy(self.ready)
         self.ready.clear()
         for task in ts:
+            self.lock.acquire()
             service = self.which_service(task)
+            self.lock.release()
             self.greenlets.add(gevent.spawn(self.run_task, task, service))
 
     def run_task(self, task, service):
+        if not service.started:
+            service.start()
+        print "Starting task", task
         task(service)
         for s in self.dag.successors(task):
             if all(p.status == "Finished" for p in self.dag.predecessors(s)):
@@ -53,11 +61,11 @@ class EngineBase(object):
         self.dag = None
 
     def start_with_server(self, workflow):
-        self.start(workflow)
         queue = gevent.queue.Queue()
         server = gevent.spawn(SockServer(MonitorServer, self, workflow).run, pipe=queue)
         port = queue.get()
         print "Server started on", port
+        self.start(workflow)
         self.join()
         server.kill()
 
@@ -89,10 +97,10 @@ class LocalFullEngine(EngineBase):
         self.services = set()
 
     def which_service(self, task):
-        self.provider.start_service(self.sid, self.conf)
-        service = self.provider.get_service(self.sid)
         self.sid += 1
-        return service
+        s = self.provider.start_service(self.sid, self.conf)
+        self.services.add(s)
+        return s
 
     def current_services(self):
         return list(self.services)
@@ -109,7 +117,7 @@ class LocalSingleEngine(EngineBase):
         self.service = None
 
     def before_eval(self):
-        self.service = self.provider.start_service(0, self.conf)
+        self.service = self.provider.start_service(1, self.conf)
 
     def after_eval(self):
         self.provider.stop_service(self.service)
@@ -136,7 +144,7 @@ class LocalFixedEngine(EngineBase):
 
     def which_service(self, task):
         if len(self.services) < self.n:
-            s = self.provider.start_service(len(self.services), self.conf)
+            s = self.provider.start_service(len(self.services) + 1, self.conf)
             self.services.append(s)
         else:
             s = min(self.services, key=lambda x: len(x.tasks))

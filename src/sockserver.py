@@ -1,7 +1,8 @@
-from port import ObjPort
-from gevent import socket as socket
 import gevent
 from functools import partial
+from gevent import socket
+
+from port import ObjPort
 
 
 class SockServer(object):
@@ -16,7 +17,7 @@ class SockServer(object):
         if pipe:
             pipe.put(listen_sock.getsockname()[1])
         else:
-            print listen_sock.getsockname()
+            print listen_sock.getsockname()[1]
         while True:
             sock, _ = listen_sock.accept()
             gevent.spawn(self.handle_let, sock)

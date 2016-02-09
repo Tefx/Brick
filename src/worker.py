@@ -1,6 +1,10 @@
-import Husky
-from gevent.event import AsyncResult
+#!/usr/bin/env python
+
 import gevent
+from gevent.event import AsyncResult
+from gevent.lock import Semaphore
+
+import Husky
 import gipc
 
 
@@ -13,11 +17,13 @@ def process_worker(task_queue):
         task_queue.put((tid, Husky.dumps(res)))
         task_queue.put((-1, ("Idle", None)))
 
-
 class Puppet(object):
     def __init__(self):
         self.results = {}
         self.status = ("Idle", None)
+        self.worker = None
+        self.operator = None
+        self.lock = Semaphore()
 
     def receive_info(self):
         while True:
@@ -29,7 +35,9 @@ class Puppet(object):
 
     def submit_task(self, tid, task_info):
         self.results[tid] = AsyncResult()
+        self.lock.acquire()
         self.task_queue.put((tid, task_info))
+        self.lock.release()
 
     def fetch_result(self, tid, wait=False):
         res = self.results[tid].get()
