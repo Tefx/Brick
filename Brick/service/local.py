@@ -1,4 +1,4 @@
-import time
+import gevent
 from gevent.subprocess import Popen, PIPE, check_output
 
 import gipc
@@ -48,7 +48,7 @@ class LXCService(ServiceBase):
                     break
             return port
         else:
-            time.sleep(0.5)
+            gevent.sleep(0.5)
             return self.get_ip(nic)
 
     def start(self):

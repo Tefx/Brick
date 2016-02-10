@@ -1,9 +1,9 @@
-from Brick.service import *
+import Brick.service.local as LS
 from base import ProviderBase
 
 
 class ProcessProvider(ProviderBase):
-    _service_class_ = LocalProcessService
+    _service_class_ = LS.ProcessService
     _config_ = {"local": {"cpu_scale": 1}}
 
     def calculate_price(self, service):
@@ -11,7 +11,7 @@ class ProcessProvider(ProviderBase):
 
 
 class LXCProvider(ProviderBase):
-    _service_class_ = LocalLXCService
+    _service_class_ = LS.LXCService
     _config_ = {"tiny": {"cpu_scale": 1},
                 "small": {"cpu_scale": 2}}
 

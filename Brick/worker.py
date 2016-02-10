@@ -7,7 +7,7 @@ from gevent.lock import Semaphore
 import Husky
 import gipc
 
-from Brick.sockserver import SockServer
+from Brick.sockserver import SockServer, SockClient
 
 
 def process_worker(task_queue):
@@ -66,3 +66,14 @@ class Puppet(object):
 def run_worker():
     port = int(sys.argv[1]) if len(sys.argv) > 1 else 0
     SockServer(Puppet).run(port)
+
+
+def test_worker():
+    host = sys.argv[1]
+    port = int(sys.argv[2])
+    client = SockClient((host, port))
+    client.hire_worker()
+    gevent.sleep(1)
+    client.fire_worker()
+    client.shutdown()
+    print "Successed!"

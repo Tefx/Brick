@@ -5,9 +5,11 @@ class ProviderBase(object):
 
     def __init__(self):
         self.services = {}
+        self.service_args = []
+        self.service_kwargs = {}
 
     def start_service(self, s_id, s_type):
-        self.services[s_id] = self._service_class_(s_id, s_type)
+        self.services[s_id] = self._service_class_(s_id, s_type, *self.service_args, **self.service_kwargs)
         return self.services[s_id]
 
     def stop_service(self, service):
