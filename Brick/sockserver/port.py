@@ -1,5 +1,6 @@
 import struct
 from gevent.socket import SHUT_RDWR
+
 import Husky
 import snappy
 

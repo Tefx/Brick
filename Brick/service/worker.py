@@ -1,11 +1,13 @@
 #!/usr/bin/env python
-
 import gevent
+import sys
 from gevent.event import AsyncResult
 from gevent.lock import Semaphore
 
 import Husky
 import gipc
+
+from Brick.sockserver import SockServer
 
 
 def process_worker(task_queue):
@@ -16,6 +18,7 @@ def process_worker(task_queue):
         res = task(*argv, **kwargs)
         task_queue.put((tid, Husky.dumps(res)))
         task_queue.put((-1, ("Idle", None)))
+
 
 class Puppet(object):
     def __init__(self):
@@ -39,7 +42,7 @@ class Puppet(object):
         self.task_queue.put((tid, task_info))
         self.lock.release()
 
-    def fetch_result(self, tid, wait=False):
+    def fetch_result(self, tid):
         res = self.results[tid].get()
         del self.results[tid]
         return res
@@ -59,6 +62,7 @@ class Puppet(object):
     def current_tasks(self):
         return self.results.keys()
 
-if __name__ == '__main__':
-    from sockserver import SockServer
-    SockServer(Puppet).run()
+
+def run_worker():
+    port = int(sys.argv[1]) if len(sys.argv) > 1 else 0
+    SockServer(Puppet).run(port)

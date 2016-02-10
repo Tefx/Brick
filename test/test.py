@@ -1,6 +1,8 @@
-from engine import *
-from provider import *
-from workflow import Workflow
+import time
+
+from Brick.engine import *
+from Brick.provider import *
+from Brick.workflow import Workflow
 
 
 def test_diamond():
@@ -8,26 +10,26 @@ def test_diamond():
 
     @w.create_task()
     def start_task(x):
-        time.sleep(5)
+        time.sleep(10)
         return x + 3
 
     @w.create_task()
     def mid_task(x):
-        time.sleep(5)
+        time.sleep(10)
         return x + 42
 
     @w.create_task()
     def final(x, y, z):
-        time.sleep(5)
+        time.sleep(10)
         return x * y + z
 
     y = start_task(1)
     res = final(mid_task(y), mid_task(y), mid_task(y))
     w.save("dag.dot")
 
-    # p = LocalProcessProvider()
-    p = LocalLXCProvider()
-    e = LocalFixedEngine(p, 3)
+    p = LocalProcessProvider()
+    # p = LocalLXCProvider()
+    e = LimitEngine(p, 2)
 
     st = time.time()
     e.start_with_server(w)
@@ -61,7 +63,7 @@ def test_meta_merge():
 
     w.save("dag.dot")
     p = LocalProcessProvider()
-    e = LocalFixedEngine(p, 2)
+    e = LimitEngine(p, 1)
     e.start(w)
 
     e.join()

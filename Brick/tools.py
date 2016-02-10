@@ -1,13 +1,12 @@
-#!/usr/bin/env python
-
 import sys
 import time
 
 from tabulate import tabulate
 
-from sockserver import SockClient
+from Brick.sockserver import SockClient
 
-if __name__ == '__main__':
+
+def list_status():
     port = int(sys.argv[1])
     try:
         client = SockClient(("localhost", port))

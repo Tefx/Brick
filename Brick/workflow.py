@@ -1,10 +1,11 @@
-from itertools import chain
 import collections
-import time
-import networkx as nx
-import os
 import copy
 import json
+import time
+from itertools import chain
+
+import networkx as nx
+import os
 
 
 def search_task(top_var):
