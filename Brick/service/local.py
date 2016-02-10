@@ -14,19 +14,17 @@ class ProcessService(ServiceBase):
         super(ProcessService, self).__init__(s_id, conf)
         self.puppet_process = None
 
-    def start(self):
-        super(ProcessService, self).start()
+    def real_start(self):
         pr, pw = gipc.pipe()
         self.puppet_process = gipc.start_process(target=SockServer(Puppet).run, kwargs={"pipe": pw})
         port = pr.get()
         self.puppet = SockClient(("localhost", port), keep_alive=False)
         self.puppet.hire_worker()
 
-    def terminate(self):
+    def real_terminate(self):
         self.puppet.fire_worker()
         self.puppet.shutdown()
         self.puppet_process.terminate()
-        super(ProcessService, self).terminate()
 
 
 class LXCService(ServiceBase):
@@ -51,8 +49,7 @@ class LXCService(ServiceBase):
             gevent.sleep(0.5)
             return self.get_ip(nic)
 
-    def start(self):
-        super(LXCService, self).start()
+    def real_start(self):
         check_output(["lxc", "launch", self.image, self.name, "-p", self.conf])
         host = self.get_ip()
         args = ["lxc", "exec", self.name, self.cmd_path]
@@ -61,8 +58,7 @@ class LXCService(ServiceBase):
         self.puppet = SockClient((host, port), keep_alive=False)
         self.puppet.hire_worker()
 
-    def terminate(self):
+    def real_terminate(self):
         self.puppet.fire_worker()
         self.puppet.shutdown()
         lxc.delete(self.name)
-        super(LXCService, self).terminate()

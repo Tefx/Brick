@@ -55,6 +55,9 @@ class LimitEngine(EngineBase):
         self.services = []
 
     def which_service(self, task):
+        for s in self.services:
+            if len(s.tasks) == 0:
+                return s
         if len(self.services) < self.n:
             s = self.provider.start_service(len(self.services) + 1, self.conf)
             self.services.append(s)

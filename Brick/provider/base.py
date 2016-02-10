@@ -3,10 +3,10 @@ class ProviderBase(object):
     _config_ = NotImplemented
     _quota_ = NotImplemented
 
-    def __init__(self):
+    def __init__(self, *service_args, **service_kwargs):
         self.services = {}
-        self.service_args = []
-        self.service_kwargs = {}
+        self.service_args = service_args
+        self.service_kwargs = service_kwargs
 
     def start_service(self, s_id, s_type):
         self.services[s_id] = self._service_class_(s_id, s_type, *self.service_args, **self.service_kwargs)

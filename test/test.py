@@ -1,7 +1,8 @@
 import time
 
 from Brick.engine import *
-from Brick.provider import *
+from Brick.provider import local as LP
+from Brick.provider.qing import QingProvider
 from Brick.workflow import Workflow
 
 
@@ -15,21 +16,26 @@ def test_diamond():
 
     @w.create_task()
     def mid_task(x):
-        time.sleep(10)
+        time.sleep(60)
         return x + 42
 
     @w.create_task()
-    def final(x, y, z):
+    def final(l):
         time.sleep(10)
-        return x * y + z
+        return sum(l)
 
     y = start_task(1)
-    res = final(mid_task(y), mid_task(y), mid_task(y))
+    res = final([mid_task(y) for _ in range(10)])
     w.save("dag.dot")
 
-    # p = LocalProcessProvider()
-    p = LocalLXCProvider()
-    e = LimitEngine(p, 2)
+    # p = LP.ProcessProvider()
+    # p = LP.LXCProvider()
+    p = QingProvider(api_keypath="access_key.csv",
+                     zone="pek2",
+                     image="img-x18zen9y",
+                     keypair="kp-p2h7c1sp",
+                     vxnets="vxnet-0domhwj")
+    e = LimitEngine(p, 5)
 
     st = time.time()
     e.start_with_server(w)
@@ -62,7 +68,7 @@ def test_meta_merge():
     c = final(b)
 
     w.save("dag.dot")
-    p = LocalProcessProvider()
+    p = LP.ProcessProvider()
     e = LimitEngine(p, 1)
     e.start(w)
 

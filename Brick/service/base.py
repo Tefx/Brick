@@ -1,4 +1,5 @@
 import time
+from gevent.lock import Semaphore
 
 import Husky
 
@@ -11,29 +12,54 @@ class ServiceBase(object):
         self.finish_time = None
         self.puppet = None
         self.started = False
+        self.lock = Semaphore()
+        self.queue = set()
 
     def start(self):
+        self.lock.acquire()
+        if self.started:
+            self.lock.release()
+            return
         print "Starting service", self.s_id
         self.start_time = time.time()
+        self.real_start()
         self.started = True
+        self.lock.release()
 
     def terminate(self):
+        self.real_terminate()
         self.finish_time = time.time()
         self.started = False
+
+    def real_start(self):
+        raise NotImplementedError
+
+    def real_terminate(self):
+        raise NotImplementedError
+
+    def record_task(self, task):
+        self.queue.add(task.tid)
 
     def run(self, tid, task, *argv, **kwargs):
         task_info = Husky.dumps((task, argv, kwargs))
         self.puppet.submit_task(tid, task_info)
         res = self.puppet.fetch_result(tid)
+        self.queue.discard(tid)
         return Husky.loads(res)
 
     def __getattr__(self, item):
-        if not self.puppet:
-            return "Not available"
         if item == "tasks":
-            return self.puppet.current_tasks()
+            return list(self.queue)
+            # if self.puppet:
+            #     ts = self.puppet.current_tasks()
+            #     return ts
+            # else:
+            #     return ["?"]
         elif item == "status":
-            return self.puppet.get_attr("status")
+            if self.puppet:
+                return self.puppet.get_attr("status")
+            else:
+                return "Unknown"
 
     def __repr__(self):
         return "%s-%d" % (self.conf, self.s_id)

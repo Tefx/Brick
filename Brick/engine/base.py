@@ -41,13 +41,14 @@ class EngineBase(object):
         for task in ts:
             self.lock.acquire()
             service = self.which_service(task)
+            service.record_task(task)
             self.lock.release()
             self.greenlets.add(gevent.spawn(self.run_task, task, service))
 
     def run_task(self, task, service):
         if not service.started:
             service.start()
-        print "Starting task", task
+        print "Launching task", task
         task(service)
         for s in self.dag.successors(task):
             if all(p.status == "Finished" for p in self.dag.predecessors(s)):
