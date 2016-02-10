@@ -27,8 +27,8 @@ def test_diamond():
     res = final(mid_task(y), mid_task(y), mid_task(y))
     w.save("dag.dot")
 
-    p = LocalProcessProvider()
-    # p = LocalLXCProvider()
+    # p = LocalProcessProvider()
+    p = LocalLXCProvider()
     e = LimitEngine(p, 2)
 
     st = time.time()

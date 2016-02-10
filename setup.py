@@ -1,7 +1,7 @@
 from setuptools import setup, find_packages
 
-requires = ["gevent", "sh", "python-snappy", "Husky", "tabulate", "gipc", "networkx"]
-console_scripts = ['brick-worker=Brick.service.worker:run_worker',
+requires = ["gevent", "sh", "python-snappy", "Husky", "tabulate", "gipc", "networkx", "decorator"]
+console_scripts = ['brick-worker=Brick.worker:run_worker',
                    'brick-ls=Brick.tools:list_status']
 
 setup(

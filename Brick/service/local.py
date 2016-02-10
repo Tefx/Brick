@@ -5,8 +5,8 @@ import gipc
 from sh import lxc
 
 from Brick.sockserver import SockServer, SockClient
+from Brick.worker import Puppet
 from base import ServiceBase
-from worker import Puppet
 
 
 class ProcessService(ServiceBase):
@@ -56,7 +56,6 @@ class LXCService(ServiceBase):
         check_output(["lxc", "launch", self.image, self.name, "-p", self.conf])
         host = self.get_ip()
         args = ["lxc", "exec", self.name, self.cmd_path]
-        print self.name, self.cmd_path
         p = Popen(args=args, stdout=PIPE).stdout
         port = int(p.readline().strip())
         self.puppet = SockClient((host, port), keep_alive=False)
