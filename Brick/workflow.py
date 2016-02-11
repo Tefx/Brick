@@ -9,7 +9,15 @@ import networkx as nx
 import os
 
 
-def search_task2(var):
+def check_sequence(v):
+    return isinstance(v, collections.Sequence) and (not isinstance(v, basestring))
+
+
+def check_iterable(v):
+    return isinstance(v, collections.Iterable) and (not isinstance(v, basestring))
+
+
+def search_task(var):
     ts = []
     if isinstance(var, Task):
         ts.append(var)
@@ -17,14 +25,18 @@ def search_task2(var):
         for v in var.itervalues():
             if isinstance(v, Task):
                 ts.append(v)
-    elif isinstance(var, collections.Iterable):
+            elif check_iterable(v):
+                ts += search_task(v)
+    elif check_iterable(var):
         for v in var:
             if isinstance(v, Task):
                 ts.append(v)
+            elif check_iterable(v):
+                ts += search_task(v)
     return ts
 
 
-def repleace_task2(var, attr):
+def replace_task(var, attr):
     if isinstance(var, Task):
         return getattr(var, attr)
     elif isinstance(var, collections.MutableMapping):
@@ -32,12 +44,17 @@ def repleace_task2(var, attr):
         for k, v in var2.iteritems():
             if isinstance(v, Task):
                 var2[k] = getattr(v, attr)
+            elif check_iterable(v):
+                var2[k] = replace_task(v, attr)
         return var2
     elif isinstance(var, collections.MutableSequence):
         var2 = copy.copy(var)
         for i in range(len(var2)):
-            if isinstance(var2[i], Task):
-                var2[i] = getattr(var2[i], attr)
+            v = var2[i]
+            if isinstance(v, Task):
+                var2[i] = getattr(v, attr)
+            elif check_iterable(v):
+                var2[i] = replace_task(v, attr)
         return var2
     elif isinstance(var, collections.MutableSet):
         var2 = copy.copy(var)
@@ -45,10 +62,14 @@ def repleace_task2(var, attr):
         for v in var2:
             if isinstance(v, Task):
                 tmp.append(v)
+            elif check_iterable(v):
+                tmp.append(replace_task(v, attr))
         for v in tmp:
             var2.discard(v)
             var2.add(getattr(v, attr))
         return var2
+    elif check_sequence(var):
+        return tuple(replace_task(list(var), attr))
     return var
 
 
@@ -61,12 +82,13 @@ class Task(object):
         self.metadata = None
         self.status = "Not Started"
         self.ref_time = {}
+        self.workflow = None
 
     def __call__(self, service):
         self.status = "Running"
         start_time = time.time()
-        argv = [repleace_task2(x, "value") for x in self.argv]
-        kwargs = {k: repleace_task2(v, "value") for k, v in self.kwargs.items()}
+        argv = [replace_task(x, "value") for x in self.argv]
+        kwargs = {k: replace_task(v, "value") for k, v in self.kwargs.items()}
         self.value = service.run(self.tid, self.f, *argv, **kwargs)
         finish_time = time.time()
         self.ref_time[service.conf] = finish_time - start_time
@@ -90,10 +112,11 @@ def default_time_func(task, conf, conf_info):
 
 
 class Workflow(object):
-    def __init__(self):
+    def __init__(self, disabled=False):
         self.gid = 1
         self.ref_time = {}
         self.dag = nx.DiGraph()
+        self.disabled = disabled
 
     def get_gid(self):
         g = self.gid
@@ -104,24 +127,23 @@ class Workflow(object):
                     meta_func=lambda *argv, **kwargs: (argv, kwargs),
                     time_func=default_time_func):
         def wrapper(f):
+            if self.disabled:
+                return f
             def wrapped(*argv, **kwargs):
                 tid = self.get_gid()
                 task = Task(tid, f, argv, kwargs)
-                argv_meta = [repleace_task2(x, "metadata") for x in argv]
-                kwargs_meta = {k: repleace_task2(v, "metadata") for k, v in kwargs.items()}
+                argv_meta = [replace_task(x, "metadata") for x in argv]
+                kwargs_meta = {k: replace_task(v, "metadata") for k, v in kwargs.items()}
                 task.metadata = meta_func(*argv_meta, **kwargs_meta)
                 task.time_func = partial(time_func, task)
                 for v in chain(argv, kwargs.itervalues()):
-                    for p in search_task2(v):
+                    for p in search_task(v):
                         self.dag.add_edge(p, task)
+                self.dag.add_node(task)
                 task.workflow = self
                 return task
             return wrapped
         return wrapper
-
-    def __iter__(self):
-        for n in self.dag.nodes():
-            yield n
 
     def save(self, path):
         with open(path, "w") as f:
@@ -136,3 +158,7 @@ class Workflow(object):
         tt = {t.tid: t.ref_time for t in self.dag.nodes()}
         with open(path, "w") as f:
             json.dump(tt, f)
+
+    def __iter__(self):
+        for node in self.dag.nodes():
+            yield node

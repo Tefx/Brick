@@ -1,9 +1,11 @@
 # Brick
 scripting and running scientific workflows in Python
 
-See test/
+test/MoWSC/test.py is a real-world example which I use to run my paper experiments.
 
-# Example:
+Following is a simple example.
+
+# Example
 
     from time import sleep
 

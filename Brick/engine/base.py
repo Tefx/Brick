@@ -5,6 +5,7 @@ import gevent.pool
 import gevent.queue
 
 from Brick.sockserver import SockServer
+from Brick.workflow import Workflow, Task
 
 
 class MonitorServer(object):
@@ -17,12 +18,16 @@ class MonitorServer(object):
 
 
 class EngineBase(object):
-    def __init__(self, provider):
+    def __init__(self, provider, workflow=None):
         self.dag = None
         self.provider = provider
         self.ready = set()
         self.greenlets = gevent.pool.Group()
         self.lock = gevent.lock.Semaphore()
+        if workflow:
+            self.workflow = workflow
+        else:
+            self.workflow = None
 
     def start(self, workflow):
         self.dag = workflow.dag
@@ -92,9 +97,19 @@ class EngineBase(object):
     def __call__(self, f):
         def wrapped(*argv, **kwargs):
             res = f(*argv, **kwargs)
-            w = res.workflow
+            if isinstance(res, Task):
+                w = res.workflow
+            elif isinstance(res, Workflow):
+                w = res
+            elif self.workflow:
+                w = self.workflow
+            else:
+                return res
             w.save("%s.dot" % f.func_name)
             self.start_with_server(w)
-            return res.value
+            if isinstance(res, Task):
+                return res.value
+            else:
+                return res
 
         return wrapped

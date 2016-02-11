@@ -2,8 +2,8 @@ from base import EngineBase
 
 
 class FullEngine(EngineBase):
-    def __init__(self, provider):
-        super(FullEngine, self).__init__(provider)
+    def __init__(self, provider, **kwargs):
+        super(FullEngine, self).__init__(provider, **kwargs)
         self.conf = self.provider.configurations()[0]
         self.sid = 0
         self.services = set()
@@ -23,8 +23,8 @@ class FullEngine(EngineBase):
 
 
 class SingleEngine(EngineBase):
-    def __init__(self, provider):
-        super(SingleEngine, self).__init__(provider)
+    def __init__(self, provider, **kwargs):
+        super(SingleEngine, self).__init__(provider, **kwargs)
         self.conf = self.provider.configurations()[0]
         self.service = None
 
@@ -43,8 +43,8 @@ class SingleEngine(EngineBase):
 
 
 class LimitEngine(EngineBase):
-    def __init__(self, provider, n):
-        super(LimitEngine, self).__init__(provider)
+    def __init__(self, provider, n, **kwargs):
+        super(LimitEngine, self).__init__(provider, **kwargs)
         self.conf = self.provider.configurations()[0]
         self.n = n
         self.services = []
