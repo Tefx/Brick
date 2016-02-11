@@ -88,3 +88,13 @@ class EngineBase(object):
 
     def after_task(self, task, service):
         pass
+
+    def __call__(self, f):
+        def wrapped(*argv, **kwargs):
+            res = f(*argv, **kwargs)
+            w = res.workflow
+            w.save("%s.dot" % f.func_name)
+            self.start_with_server(w)
+            return res.value
+
+        return wrapped

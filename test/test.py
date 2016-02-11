@@ -2,7 +2,6 @@ import time
 
 from Brick.engine import *
 from Brick.provider import local as LP
-from Brick.provider.qing import QingProvider
 from Brick.workflow import Workflow
 
 
@@ -16,7 +15,7 @@ def test_diamond():
 
     @w.create_task()
     def mid_task(x):
-        time.sleep(60)
+        time.sleep(10)
         return x + 42
 
     @w.create_task()
@@ -29,13 +28,13 @@ def test_diamond():
     w.save("dag.dot")
 
     # p = LP.ProcessProvider()
-    # p = LP.LXCProvider()
-    p = QingProvider(api_keypath="access_key.csv",
-                     zone="pek2",
-                     image="img-x18zen9y",
-                     keypair="kp-p2h7c1sp",
-                     vxnets="vxnet-0domhwj")
-    e = LimitEngine(p, 5)
+    p = LP.LXCProvider()
+    # p = QingProvider(api_keypath="access_key.csv",
+    #                  zone="pek2",
+    #                  image="img-x18zen9y",
+    #                  keypair="kp-p2h7c1sp",
+    #                  vxnets="vxnet-0domhwj")
+    e = LimitEngine(p, 4)
 
     st = time.time()
     e.start_with_server(w)

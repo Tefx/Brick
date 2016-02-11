@@ -1,12 +1,20 @@
 import gevent
-from gevent.subprocess import Popen, PIPE, check_output
+from gevent import socket
 
 import gipc
-from sh import lxc
+import sh
 
 from Brick.sockserver import SockServer, SockClient
 from Brick.worker import Puppet
 from base import ServiceBase
+
+
+def try_until(f):
+    try:
+        return f()
+    except socket.error:
+        gevent.sleep(1)
+        return try_until(f)
 
 
 class ProcessService(ServiceBase):
@@ -29,7 +37,8 @@ class ProcessService(ServiceBase):
 
 class LXCService(ServiceBase):
     image = "brick-worker"
-    cmd_path = "brick-worker"
+    # cmd_path = "brick-worker"
+    port = 42424
 
     def __init__(self, s_id, conf):
         super(LXCService, self).__init__(s_id, conf)
@@ -37,28 +46,25 @@ class LXCService(ServiceBase):
         self.name = "brick-%s" % self.s_id
 
     def get_ip(self, nic="eth0"):
-        info = lxc.info(self.name)
+        info = sh.lxc.info(self.name)
         port = None
         if nic in info:
-            for line in lxc.info(self.name).splitlines():
+            for line in sh.lxc.info(self.name).splitlines():
                 if nic in line:
                     port = line.split()[-2]
                     break
             return port
         else:
-            gevent.sleep(0.5)
+            gevent.sleep(1)
             return self.get_ip(nic)
 
     def real_start(self):
-        check_output(["lxc", "launch", self.image, self.name, "-p", self.conf])
+        sh.lxc.launch(self.image, self.name, p=self.conf)
         host = self.get_ip()
-        args = ["lxc", "exec", self.name, self.cmd_path]
-        p = Popen(args=args, stdout=PIPE).stdout
-        port = int(p.readline().strip())
-        self.puppet = SockClient((host, port), keep_alive=False)
-        self.puppet.hire_worker()
+        self.puppet = SockClient((host, self.port), keep_alive=False)
+        try_until(self.puppet.hire_worker)
 
     def real_terminate(self):
         self.puppet.fire_worker()
         self.puppet.shutdown()
-        lxc.delete(self.name)
+        sh.lxc.delete(self.name)

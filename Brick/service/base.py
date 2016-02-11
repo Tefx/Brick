@@ -48,18 +48,16 @@ class ServiceBase(object):
         return Husky.loads(res)
 
     def __getattr__(self, item):
-        if item == "tasks":
-            return list(self.queue)
-            # if self.puppet:
-            #     ts = self.puppet.current_tasks()
-            #     return ts
-            # else:
-            #     return ["?"]
-        elif item == "status":
-            if self.puppet:
-                return self.puppet.get_attr("status")
-            else:
-                return "Unknown"
+        try:
+            if item == "tasks":
+                return list(self.queue)
+            elif item == "status":
+                if self.puppet:
+                    return self.puppet.get_attr("status")
+                else:
+                    return "Booting"
+        except:
+            return "Booting"
 
     def __repr__(self):
         return "%s-%d" % (self.conf, self.s_id)
