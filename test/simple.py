@@ -30,4 +30,4 @@ def test_mapper(a, n):
 
 
 if __name__ == '__main__':
-    print test_mapper(1, 5)
+    print "The answer is: %d" % test_mapper(1, 5)
