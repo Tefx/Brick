@@ -1,7 +1,6 @@
 import collections
 import copy
 import json
-import time
 from functools import partial
 from itertools import chain
 
@@ -86,12 +85,9 @@ class Task(object):
 
     def __call__(self, service):
         self.status = "Running"
-        start_time = time.time()
         argv = [replace_task(x, "value") for x in self.argv]
         kwargs = {k: replace_task(v, "value") for k, v in self.kwargs.items()}
-        self.value = service.run(self.tid, self.f, *argv, **kwargs)
-        finish_time = time.time()
-        self.ref_time[service.conf] = finish_time - start_time
+        self.value, self.ref_time[service.conf] = service.run(self.tid, self.f, *argv, **kwargs)
         self.status = "Finished"
         return self.value
 

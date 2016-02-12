@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 import gevent
 import sys
+import time
 from gevent.event import AsyncResult
 from gevent.lock import Semaphore
 
@@ -16,8 +17,10 @@ def process_worker(task_queue):
         tid, task_info = task_queue.get()
         task_queue.put((-1, ("Working", tid)))
         (task, argv, kwargs) = Husky.loads(task_info)
+        start_time = time.time()
         res = task(*argv, **kwargs)
-        task_queue.put((tid, Husky.dumps(res)))
+        used_time = time.time() - start_time
+        task_queue.put((tid, Husky.dumps((res, used_time))))
         task_queue.put((-1, ("Idle", None)))
 
 
