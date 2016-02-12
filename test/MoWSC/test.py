@@ -3,13 +3,13 @@ import json
 import sh
 
 from Brick.engine import LimitEngine
-from Brick.provider.local import ProcessProvider
 from Brick.provider.qing import QingProvider
 from Brick.workflow import Workflow
 from plot import mpl_plot_front, mpl_plot_track, mpl_plot_hvs
 from util import *
 
-base_path = "./"
+# base_path = "./"
+base_path = "/net/brick/MoWSC/"
 
 dag_path = base_path + "dag/"
 output_path = base_path + "output/"
@@ -137,13 +137,12 @@ def plot_hv(app, hvs):
 
 p = QingProvider(api_keypath="../access_key.csv",
                  zone="pek2",
-                 image="img-7yorhmuq",
+                 image="img-95qv82sx",
                  keypair="kp-p2h7c1sp",
                  vxnets="vxnet-0domhwj")
 
 
-@LimitEngine(ProcessProvider(), 4, workflow=w)
-# @FullEngine(ProcessProvider(), workflow=w)
+@LimitEngine(p, 5, workflow=w)
 def mowsc_exp(wf_args, repeat=2):
     for app, numbers in wf_args.iteritems():
         hvs = {}
