@@ -4,6 +4,8 @@ import gevent.lock
 import gevent.pool
 import gevent.queue
 
+import os.path
+
 from Brick.sockserver import SockServer
 from Brick.workflow import Workflow, Task
 
@@ -116,8 +118,12 @@ class EngineBase(object):
                 w = self.workflow
             else:
                 return res
+            time_file = "%s.time" % f.func_name
+            if os.path.exists(time_file):
+                w.load_time(time_file)
             w.save("%s.dot" % f.func_name)
             self.start_with_server(w)
+            w.dump_time(time_file)
             if isinstance(res, Task):
                 return res.value
             else:

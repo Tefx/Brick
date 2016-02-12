@@ -29,6 +29,8 @@ class ServiceBase(object):
         self.lock.release()
 
     def terminate(self):
+        if not self.puppet:
+            return
         self.real_terminate()
         self._status = "Terminated"
         self.puppet = None

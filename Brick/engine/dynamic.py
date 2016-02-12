@@ -1,3 +1,5 @@
+from gevent.lock import Semaphore
+
 from base import EngineBase
 
 
@@ -48,6 +50,11 @@ class LimitEngine(EngineBase):
         self.conf = self.provider.configurations()[0]
         self.n = n
         self.services = []
+        self.num_unscheduled = -1
+        self.le_lock = Semaphore()
+
+    def before_eval(self):
+        self.num_unscheduled = len(self.dag)
 
     def after_eval(self):
         for s in self.services:
@@ -55,6 +62,7 @@ class LimitEngine(EngineBase):
         self.services = []
 
     def which_service(self, task):
+        self.num_unscheduled -= 1
         for s in self.services:
             if len(s.tasks) == 0:
                 return s
@@ -64,6 +72,13 @@ class LimitEngine(EngineBase):
         else:
             s = min(self.services, key=lambda x: len(x.tasks))
         return s
+
+    def after_task(self, task, service):
+        self.le_lock.acquire()
+        print self.num_unscheduled
+        if self.num_unscheduled == 0 and len(service.tasks) == 0:
+            self.provider.stop_service(service)
+        self.le_lock.release()
 
     def current_services(self):
         return self.services
