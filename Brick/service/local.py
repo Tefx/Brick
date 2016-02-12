@@ -67,4 +67,5 @@ class LXCService(ServiceBase):
     def real_terminate(self):
         self.puppet.fire_worker()
         self.puppet.shutdown()
+        sh.lxc.stop(self.name)
         sh.lxc.delete(self.name)

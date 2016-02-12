@@ -13,7 +13,7 @@ def list_status():
     table = []
     for status in client.get_status():
         sid, conf, st, ft, status, queue = status
-        if status != "Unknown":
+        if status != "Booting":
             status, current_task = status
             if current_task in queue:
                 queue.remove(current_task)

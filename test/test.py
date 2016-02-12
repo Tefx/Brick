@@ -31,7 +31,7 @@ def test_diamond():
     p = LP.LXCProvider()
     # p = QingProvider(api_keypath="access_key.csv",
     #                  zone="pek2",
-    #                  image="img-x18zen9y",
+    #                  image="img-otvbfhwn",
     #                  keypair="kp-p2h7c1sp",
     #                  vxnets="vxnet-0domhwj")
     e = LimitEngine(p, 4)
