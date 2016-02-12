@@ -11,9 +11,10 @@ class ServiceBase(object):
         self.start_time = None
         self.finish_time = None
         self.puppet = None
-        self.started = False
         self.lock = Semaphore()
         self.queue = set()
+        self._status = "Unknown"
+        self.started = False
 
     def start(self):
         self.lock.acquire()
@@ -22,14 +23,16 @@ class ServiceBase(object):
             return
         print "Starting service", self.s_id
         self.start_time = time.time()
+        self._status = "Booting"
         self.real_start()
         self.started = True
         self.lock.release()
 
     def terminate(self):
         self.real_terminate()
+        self._status = "Terminated"
+        self.puppet = None
         self.finish_time = time.time()
-        self.started = False
 
     def real_start(self):
         raise NotImplementedError
@@ -55,9 +58,14 @@ class ServiceBase(object):
                 if self.puppet:
                     return self.puppet.get_attr("status")
                 else:
-                    return "Booting"
+                    return self._status
+            elif item in ["cpu", "memory"]:
+                if self.puppet:
+                    return self.puppet.get_attr(item)
+                else:
+                    return None
         except:
-            return "Booting"
+            return "Unknown"
 
     def __repr__(self):
         return "%s-%d" % (self.conf, self.s_id)

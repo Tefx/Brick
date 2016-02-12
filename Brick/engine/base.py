@@ -77,7 +77,18 @@ class EngineBase(object):
 
     def current_status(self):
         for s in self.current_services():
-            yield s.s_id, s.conf, s.start_time, s.finish_time, s.status, s.tasks
+            status = s.status
+            queue = s.tasks
+            if isinstance(status, tuple):
+                status, current_task = status
+                if current_task in queue:
+                    queue.remove(current_task)
+                for t in self.dag.nodes_iter():
+                    if t.tid == current_task:
+                        current_task = str(t)
+            else:
+                current_task = None
+            yield s.s_id, s.conf, s.start_time, s.finish_time, status, current_task, queue, s.cpu, s.memory
 
     def current_services(self):
         raise NotImplementedError

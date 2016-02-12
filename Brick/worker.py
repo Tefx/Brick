@@ -6,6 +6,7 @@ from gevent.lock import Semaphore
 
 import Husky
 import gipc
+import psutil
 
 from Brick.sockserver import SockServer, SockClient
 
@@ -57,7 +58,12 @@ class Puppet(object):
         self.operator.kill()
 
     def get_attr(self, attr):
-        return getattr(self, attr, "No such attribute")
+        if attr == "cpu":
+            return psutil.cpu_percent(interval=None)
+        elif attr == "memory":
+            return psutil.virtual_memory().percent
+        else:
+            return getattr(self, attr, "No such attribute")
 
     def current_tasks(self):
         return self.results.keys()

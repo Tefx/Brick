@@ -19,7 +19,7 @@ class FullEngine(EngineBase):
 
     def after_task(self, task, service):
         self.provider.stop_service(service)
-        self.services.discard(service)
+        # self.services.discard(service)
 
 
 class SingleEngine(EngineBase):
