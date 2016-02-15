@@ -61,4 +61,44 @@ the image is like:
 
 ![DAG](test/merge.png)
 
+Also, one can get the runtime information of each task in file "merge.time":
+
+    file "merge.time":
+
+    {
+        "my_cat-[11]": {
+            "local": 0.03966093063354492
+        },
+        "my_ls-[10]": {
+            "local": 0.02331995964050293
+        },
+        "my_ls-[1]": {
+            "local": 0.025688886642456055
+        },
+        "my_ls-[2]": {
+            "local": 0.012750864028930664
+        },
+        "my_ls-[3]": {
+            "local": 0.013489007949829102
+        },
+        "my_ls-[4]": {
+            "local": 0.043313026428222656
+        },
+        "my_ls-[5]": {
+            "local": 0.03586411476135254
+        },
+        "my_ls-[6]": {
+            "local": 0.025271892547607422
+        },
+        "my_ls-[7]": {
+            "local": 0.03649592399597168
+        },
+        "my_ls-[8]": {
+            "local": 0.036749839782714844
+        },
+        "my_ls-[9]": {
+            "local": 0.01423192024230957
+        }
+    }
+
 
