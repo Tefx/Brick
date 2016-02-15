@@ -3,8 +3,8 @@ import json
 import sh
 
 from Brick.engine import LimitEngine
-from Brick.provider.qing import QingProvider
 from Brick.provider.local import ProcessProvider
+from Brick.provider.qing import QingProvider
 from Brick.workflow import Workflow
 from plot import mpl_plot_front, mpl_plot_track, mpl_plot_hvs
 from util import *
@@ -19,9 +19,8 @@ support_path = base_path + "support/"
 info_path = support_path + "ec2.json"
 hv_module_path = support_path + "hv.py"
 
-workflows = {"CYBERSHAKE": [1000]}
-# "MONTAGE": [25, 50, 100, 1000]}
-algorithms = ["spea2_star"]#, "esc_p", "esc_f", "esc_nh", "moabc"]
+workflows = {"CYBERSHAKE": [50, 100], "MONTAGE": [50, 100]}
+algorithms = ["spea2_star", "esc_p", "esc_f", "esc_nh", "moabc"]
 hv_reference_point = [1.1, 1.1]
 
 w = Workflow(disabled=False)
@@ -144,7 +143,7 @@ p = QingProvider(api_keypath="../access_key.csv",
 
 
 # @LimitEngine(p, 5, workflow=w)
-@LimitEngine(ProcessProvider(), 1, workflow=w)
+@LimitEngine(ProcessProvider(), 4, workflow=w)
 def mowsc_exp(wf_args, repeat=2):
     for app, numbers in wf_args.iteritems():
         hvs = {}
@@ -176,5 +175,5 @@ if __name__ == '__main__':
     import time
 
     start_time = time.time()
-    mowsc_exp(workflows, 4)
+    mowsc_exp(workflows, 2)
     print "Used %fs" % (time.time() - start_time)

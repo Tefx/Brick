@@ -118,6 +118,8 @@ class EngineBase(object):
                 w = self.workflow
             else:
                 return res
+            if w.disabled:
+                return res
             time_file = "%s.time" % f.func_name
             if os.path.exists(time_file):
                 w.load_time(time_file)
