@@ -92,7 +92,7 @@ class Task(object):
         return self.value
 
     def __repr__(self):
-        return "%d-%s" % (self.tid, self.f.__name__)
+        return "%s-[%d]" % (self.f.__name__, self.tid)
 
     def __hash__(self):
         return self.tid
@@ -148,12 +148,12 @@ class Workflow(object):
 
     def load_time(self, path):
         with open(path, "r") as f:
-            self.ref_time = json.load(f)
+            self.ref_time = {int(k.split()[1].strip("[]")): v for k,v in json.load(f).iteritems()}
 
     def dump_time(self, path):
-        tt = {t.tid: t.ref_time for t in self.dag.nodes()}
+        tt = {str(t): t.ref_time for t in self.dag.nodes()}
         with open(path, "w") as f:
-            json.dump(tt, f)
+            json.dump(tt, f, sort_keys=True, indent=4, separators=(',', ': '))
 
     def __iter__(self):
         for node in self.dag.nodes():

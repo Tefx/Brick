@@ -77,6 +77,9 @@ class LimitEngine(EngineBase):
         self.le_lock.acquire()
         if self.num_unscheduled == 0 and len(service.tasks) == 0:
             self.provider.stop_service(service)
+            for s in self.services:
+                if len(s.tasks) == 0:
+                    self.provider.stop_service(s)
         self.le_lock.release()
 
     def current_services(self):
