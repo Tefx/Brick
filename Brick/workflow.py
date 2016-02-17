@@ -1,6 +1,7 @@
 import collections
 import copy
 import json
+import time
 from functools import partial
 from itertools import chain
 
@@ -81,13 +82,16 @@ class Task(object):
         self.metadata = None
         self.status = "Not Started"
         self.ref_time = {}
+        self.start_time = None
+        self.finish_time = None
         self.workflow = None
 
     def __call__(self, service):
         self.status = "Running"
         argv = [replace_task(x, "value") for x in self.argv]
         kwargs = {k: replace_task(v, "value") for k, v in self.kwargs.items()}
-        self.value, self.ref_time[service.conf] = service.run(self.tid, self.f, *argv, **kwargs)
+        self.value, self.start_time, self.finish_time = service.run(self.tid, self.f, *argv, **kwargs)
+        self.ref_time[service.conf] = self.finish_time - self.start_time
         self.status = "Finished"
         return self.value
 
@@ -113,6 +117,7 @@ class Workflow(object):
         self.ref_time = {}
         self.dag = nx.DiGraph()
         self.disabled = disabled
+        self.start_time = None
 
     def get_gid(self):
         g = self.gid
@@ -146,14 +151,27 @@ class Workflow(object):
             print >> f, "digraph {\n%s\n}" % \
                         os.linesep.join('    "%s"->"%s"' % (p, t) for p, t in self.dag.edges())
 
+    def record_start(self):
+        self.start_time = time.time()
+
     def load_time(self, path):
-        with open(path, "r") as f:
-            self.ref_time = {int(k.split()[1].strip("[]")): v for k,v in json.load(f).iteritems()}
+        pass
+        # with open(path, "r") as f:
+        #     self.ref_time = {int(k.split()[1].strip("[]")): v for k,v in json.load(f).iteritems()}
 
     def dump_time(self, path):
         tt = {str(t): t.ref_time for t in self.dag.nodes()}
         with open(path, "w") as f:
             json.dump(tt, f, sort_keys=True, indent=4, separators=(',', ': '))
+
+    def dump_running_info(self, path):
+        info = {}
+        info["start_time"] = self.start_time
+        info["task_time"] = {}
+        for t in self.dag.nodes_iter():
+            info["task_time"][str(t)] = (t.start_time, t.finish_time)
+        with open(path, "w") as f:
+            json.dump(info, f)
 
     def __iter__(self):
         for node in self.dag.nodes():

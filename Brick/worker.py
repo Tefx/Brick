@@ -20,7 +20,8 @@ def process_worker(task_queue):
         start_time = time.time()
         res = task(*argv, **kwargs)
         used_time = time.time() - start_time
-        task_queue.put((tid, Husky.dumps((res, used_time))))
+        finish_time = time.time()
+        task_queue.put((tid, Husky.dumps((res, start_time, finish_time))))
         task_queue.put((-1, ("Idle", None)))
 
 

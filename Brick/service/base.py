@@ -21,7 +21,7 @@ class ServiceBase(object):
         if self.started:
             self.lock.release()
             return
-        print "Starting service", self.s_id
+        # print "Starting service", self.s_id
         self.start_time = time.time()
         self._status = "Booting"
         self.real_start()

@@ -32,6 +32,7 @@ class EngineBase(object):
             self.workflow = None
 
     def start(self, workflow):
+        workflow.record_start()
         self.dag = workflow.dag
         self.before_eval()
         for n,i in self.dag.in_degree_iter():
@@ -55,7 +56,7 @@ class EngineBase(object):
     def run_task(self, task, service):
         if not service.started:
             service.start()
-        print "Launching task", task
+        # print "Launching task", task
         task(service)
         for s in self.dag.successors(task):
             if all(p.status == "Finished" for p in self.dag.predecessors(s)):
@@ -121,11 +122,13 @@ class EngineBase(object):
             if w.disabled:
                 return res
             time_file = "%s.time" % f.func_name
+            info_file = "%s.run" % f.func_name
             if os.path.exists(time_file):
                 w.load_time(time_file)
             w.save("%s.dot" % f.func_name)
             self.start_with_server(w)
             w.dump_time(time_file)
+            w.dump_running_info(info_file)
             if isinstance(res, Task):
                 return res.value
             else:

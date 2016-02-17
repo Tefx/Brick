@@ -1,6 +1,6 @@
 import gevent
 
-import qingcloud.iaas
+from qingcloud.iaas import connect_to_zone
 
 from Brick.sockserver import SockClient
 from base import ServiceBase
@@ -38,9 +38,7 @@ class QingService(ServiceBase):
         self.puppet.hire_worker()
 
     def real_start(self):
-        conn = qingcloud.iaas.connect_to_zone(self.zone,
-                                              self.api_id,
-                                              self.api_key)
+        conn = connect_to_zone(self.zone, self.api_id, self.api_key)
         ret = conn.run_instances(image_id=self.image,
                                  instance_type=self.conf,
                                  login_mode="keypair",
@@ -54,21 +52,5 @@ class QingService(ServiceBase):
     def real_terminate(self):
         self.puppet.fire_worker()
         self.puppet.shutdown()
-        conn = qingcloud.iaas.connect_to_zone(self.zone,
-                                              self.api_id,
-                                              self.api_key)
+        conn = connect_to_zone(self.zone, self.api_id, self.api_key)
         conn.terminate_instances(self.instance_id)
-
-
-if __name__ == '__main__':
-    s = QingService(s_id=0,
-                    conf="c1m1",
-                    api_keypath="access_key.csv",
-                    zone="pek2",
-                    image="img-x18zen9y",
-                    keypair="kp-p2h7c1sp",
-                    vxnets="vxnet-0domhwj")
-    s.start()
-    print s.run("test", lambda x: "Hello!", 1)
-    gevent.sleep(10)
-    s.terminate()

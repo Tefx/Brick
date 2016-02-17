@@ -19,7 +19,9 @@ support_path = base_path + "support/"
 info_path = support_path + "ec2.json"
 hv_module_path = support_path + "hv.py"
 
-workflows = {"CYBERSHAKE": [50, 100], "MONTAGE": [50, 100]}
+workflows = {"LIGO": [30, 50, 100, 1000],
+             "MONTAGE": [30, 50, 100, 1000]}
+# "CYBERSHAKE":[50, 100]}
 algorithms = ["spea2_star", "esc_p", "esc_f", "esc_nh", "moabc"]
 hv_reference_point = [1.1, 1.1]
 
@@ -28,7 +30,7 @@ w = Workflow(disabled=False)
 
 @w.create_task()
 def generate_xml(app, size):
-    xml_path = dag_path + "%s_%d.xml" % (app, size)
+    xml_path = dag_path + "%s_%d.dax" % (app, size)
     wf_generator = sh.Command(support_path + "WorkflowGenerator/bin/AppGenerator")
     wf_generator("-a%s" % app, "--", n=size, _out=xml_path)
     return xml_path
@@ -82,10 +84,12 @@ def best_run(output_files):
 @w.create_task()
 def find_bounds(results):
     bounds = None
+    res = []
     for filename in results.itervalues():
         with open(filename) as f:
             result = json.load(f)
-        bounds = update_bounds(result["results"], bounds)
+        res = pareto_filter(res + result["results"])
+    bounds = update_bounds(res, bounds)
     return bounds
 
 
@@ -142,7 +146,7 @@ p = QingProvider(api_keypath="../access_key.csv",
                  vxnets="vxnet-0domhwj")
 
 
-# @LimitEngine(p, 5, workflow=w)
+# @LimitEngine(p, 10, workflow=w)
 @LimitEngine(ProcessProvider(), 4, workflow=w)
 def mowsc_exp(wf_args, repeat=2):
     for app, numbers in wf_args.iteritems():
@@ -175,5 +179,5 @@ if __name__ == '__main__':
     import time
 
     start_time = time.time()
-    mowsc_exp(workflows, 2)
+    mowsc_exp(workflows, 10)
     print "Used %fs" % (time.time() - start_time)
