@@ -1,7 +1,7 @@
 # Brick
 scripting and running scientific workflows in Python.
 
-Support processor/container/VM as environments, support local machine, cluster, IaaS and CaaS as service provider.
+Brick supports processes/containers/VMs as environments, and supports local machine, cluster, IaaS and CaaS as service provider.
 
 **The project is in its very early stage.**
 
@@ -13,7 +13,7 @@ Following is a simple example.
 
 This example is taken from https://pegasus.isi.edu/documentation/examples/, the merge workflow.
 
-Additionally， we made a few changes:
+Additionally， we make a few changes:
 
 1. the `dirs` is not fixed as in Pegasus example, but is dynamically parsed from PATH env in current system.
 
@@ -82,7 +82,7 @@ Also, one can get the runtime information of each task in files `merge.run` and 
 
 # Gallery
 
-Now, supports basic monitoring and analysis feature.
+Now, Brick supports basic monitoring and analysis features.
 
 Monitoring the execution of workflow using `brick-top` command:
 ![brick-top](test/doc_data/top.png "Monitoring the execution of workflow using `brick-top` command")
