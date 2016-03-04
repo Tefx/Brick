@@ -74,6 +74,10 @@ the image is like:
 
 ![DAG](test/merge.png)
 
+It can be run as normal Python program:
+
+![RUN](test/doc_data/run.png)
+
 Also, one can get the runtime information of each task in file "merge.run" and "merge.time" after the execution.
 
 # Gallery
