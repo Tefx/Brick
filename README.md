@@ -41,7 +41,8 @@ def merge(dirs):
     def my_cat(files):
         return str(sh.cat(*files))
 
-    return my_cat([my_ls(i, d) for i, d in enumerate(dirs)])
+    bin_files = [my_ls(i, d) for i, d in enumerate(dirs)]
+    return my_cat(bin_files)
 
 for line in merge(dirs).splitlines():
     if "brick" in line:
