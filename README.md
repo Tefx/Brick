@@ -11,7 +11,7 @@ Following is a simple example.
 
 # Example
 
-This example is taken from [https://pegasus.isi.edu/documentation/examples/](https://pegasus.isi.edu/documentation/examples/）, the merge workflow.
+This example is taken from https://pegasus.isi.edu/documentation/examples/, the merge workflow.
 
 Additionally， we made a few changes:
 
