@@ -74,7 +74,7 @@ the image is like:
 
 ![DAG](test/merge.png)
 
-It can be run as normal Python program:
+It can then run as normal Python program:
 
 ![RUN](test/doc_data/run.png)
 
