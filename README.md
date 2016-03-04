@@ -71,11 +71,19 @@ Also, one can get the runtime information of each task in file "merge.run" and "
 
 The toolkits support basic monitoring and analysis feature.
 
+Monitoring the execution of workflow using `brick-top` command:
 ![brick-top](test/doc_data/top.png "Monitoring the execution of workflow using `brick-top` command")
+
+Monitoring the execution of workflow using `brick-ls` command:
 ![brick-ls](test/doc_data/ls.png "Monitoring the execution of workflow using `brick-ls` command")
 
+Analyzing runtime information using `brick-stat` command: start time/finish time/running time of tasks.
 ![brick-stat 0](test/doc_data/stat0.png "Analyzing runtime information using `brick-stat` command: start time/finish time/running time of tasks.")
+
+Analyzing runtime information using `brick-stat` command: tasks completed by time.
 ![brick-stat 1](test/doc_data/stat1.png "Analyzing runtime information using `brick-stat` command: tasks completed by time.")
+
+Analyzing runtime information using `brick-stat` command: running time of tasks on different services.
 ![brick-stat 2](test/doc_data/stat2.png "Analyzing runtime information using `brick-stat` command: running time of tasks on different services.")
 
 
