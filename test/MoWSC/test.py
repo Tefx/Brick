@@ -3,14 +3,13 @@ import json
 import sh
 
 from Brick.engine import LimitEngine
-from Brick.provider.local import ProcessProvider
 from Brick.provider.qing import QingProvider
 from Brick.workflow import Workflow
 from plot import mpl_plot_front, mpl_plot_track, mpl_plot_hvs
 from util import *
 
-base_path = "./"
-# base_path = "/net/brick/MoWSC/"
+# base_path = "./"
+base_path = "/net/brick/MoWSC/"
 
 dag_path = base_path + "dag/"
 output_path = base_path + "output/"
@@ -19,9 +18,9 @@ support_path = base_path + "support/"
 info_path = support_path + "ec2.json"
 hv_module_path = support_path + "hv.py"
 
-workflows = {"LIGO": [30, 50, 100, 1000],
-             "MONTAGE": [30, 50, 100, 1000]}
-# "CYBERSHAKE":[50, 100]}
+workflows = {"LIGO": [30, 50, 100],
+             "MONTAGE": [30, 50, 100],
+             "CYBERSHAKE": [30, 50, 100]}
 algorithms = ["spea2_star", "esc_p", "esc_f", "esc_nh", "moabc"]
 hv_reference_point = [1.1, 1.1]
 
@@ -141,13 +140,13 @@ def plot_hv(app, hvs):
 
 p = QingProvider(api_keypath="../access_key.csv",
                  zone="pek2",
-                 image="img-d39l7c8v",
+                 image="img-th3h68c5",
                  keypair="kp-p2h7c1sp",
                  vxnets="vxnet-0domhwj")
 
 
-# @LimitEngine(p, 10, workflow=w)
-@LimitEngine(ProcessProvider(), 4, workflow=w)
+@LimitEngine(p, 10, workflow=w)
+# @LimitEngine(ProcessProvider(), 4, workflow=w)
 def mowsc_exp(wf_args, repeat=2):
     for app, numbers in wf_args.iteritems():
         hvs = {}

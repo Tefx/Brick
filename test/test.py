@@ -74,5 +74,31 @@ def test_meta_merge():
     e.join()
     print c.value
 
+
+def test_meta():
+    w = Workflow()
+
+    @w.create_task()
+    def foo(x):
+        pass
+
+    @w.create_task()
+    def bar(y):
+        pass
+
+    @w.create_task()
+    def split(z):
+        pass
+
+    @w.create_task()
+    def merge(l):
+        pass
+
+    a = split(1)
+    foo(a)
+    bar(a)
+
+    w.save("dag.dot")
+
 if __name__ == '__main__':
-    test_diamond()
+    test_meta()

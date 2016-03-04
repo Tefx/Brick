@@ -1,5 +1,9 @@
 # Brick
-scripting and running scientific workflows in Python
+scripting and running scientific workflows in Python.
+
+Support processor/container/VM as environments, support local machine, cluster, IaaS and CaaS as service provider.
+
+**The project is in very early stage.**
 
 test/MoWSC/test.py is a real-world example which I use to run my paper experiments.
 
@@ -61,44 +65,25 @@ the image is like:
 
 ![DAG](test/merge.png)
 
-Also, one can get the runtime information of each task in file "merge.time":
+Also, one can get the runtime information of each task in file "merge.run" and "merge.time" after exections.
 
-    file "merge.time":
+# Gallery
 
-    {
-        "my_cat-[11]": {
-            "local": 0.03966093063354492
-        },
-        "my_ls-[10]": {
-            "local": 0.02331995964050293
-        },
-        "my_ls-[1]": {
-            "local": 0.025688886642456055
-        },
-        "my_ls-[2]": {
-            "local": 0.012750864028930664
-        },
-        "my_ls-[3]": {
-            "local": 0.013489007949829102
-        },
-        "my_ls-[4]": {
-            "local": 0.043313026428222656
-        },
-        "my_ls-[5]": {
-            "local": 0.03586411476135254
-        },
-        "my_ls-[6]": {
-            "local": 0.025271892547607422
-        },
-        "my_ls-[7]": {
-            "local": 0.03649592399597168
-        },
-        "my_ls-[8]": {
-            "local": 0.036749839782714844
-        },
-        "my_ls-[9]": {
-            "local": 0.01423192024230957
-        }
-    }
+The toolkits support basic monitoring and analysis feature.
+
+Monitoring the execution of workflow using `brick-top` command:
+![brick-top](test/doc_data/top.png)
+
+Monitoring the execution of workflow using `brick-ls` command:
+![brick-ls](test/doc_data/ls.png)
+
+Analyzing runtime information using `brick-stat` command: start time/finish time/running time of tasks.
+![brick-stat 0](test/doc_data/stat0.png)
+
+Analyzing runtime information using `brick-stat` command: tasks completed by time.
+![brick-stat 1](test/doc_data/stat1.png)
+
+Analyzing runtime information using `brick-stat` command: running time of tasks on different services.
+![brick-stat 2](test/doc_data/stat2.png)
 
 

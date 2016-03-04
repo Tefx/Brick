@@ -5,10 +5,10 @@ import json
 
 
 def setup_mpl():
-    fig_width_pt = 600  # Get this from LaTeX using \showthe\columnwidth
+    fig_width_pt = 800  # Get this from LaTeX using \showthe\columnwidth
     inches_per_pt = 1.0 / 72.27  # Convert pt to inch
     fig_width = fig_width_pt * inches_per_pt  # width in inches
-    fig_height = fig_width_pt * inches_per_pt / 1.414  # height in inches
+    fig_height = fig_width_pt * inches_per_pt * 0.618  # height in inches
     fig_size = [fig_width, fig_height]
     params = {'figure.figsize': fig_size,
               'savefig.dpi': 600}
@@ -32,15 +32,16 @@ def state_finish_time(path):
             ts.add(t)
 
     l.sort(key=lambda x: x[0])
-    plot_finish_time(l, ts)
+    # plot_finish_time(l, ts)
     plot_num_task(l, ts)
 
 
 def plot_finish_time(l, ts):
     setup_mpl()
-    plt.subplots_adjust(hspace=0)
-    ax1 = plt.subplot(211)
-    ax1.set_ylabel('Time(s)')
+    fig = plt.figure()
+    fig.canvas.set_window_title("ST/FT/RT of tasks (tasks sorted by ST)")
+    ax1 = fig.add_subplot(211)
+    ax1.set_ylabel('Time (s)')
 
     ps = sorted(l, key=lambda x: x[2])
     # ps = l
@@ -48,13 +49,19 @@ def plot_finish_time(l, ts):
     finish_ps = [x[3] for x in ps]
     ax1.plot(range(0, len(ps)), start_ps)
     ax1.plot(range(0, len(ps)), finish_ps)
+
+    names = []
+    lines = []
     for t in ts:
         tps = [x for x in ps if x[1] == t]
         xs = [ps.index(x) for x in tps]
         ys = [y[3] for y in tps]
-        ax1.plot(xs, ys, ".")
+        lines.append(ax1.plot(xs, ys, ".")[0])
+        names.append(t)
 
-    ax2 = plt.subplot(212)
+    ax1.legend(lines, names, loc='lower right', ncol=2, numpoints=1)
+
+    ax2 = fig.add_subplot(212, sharex=ax1)
     rts = [y[3] - y[2] for y in ps]
     ax2.plot(range(0, len(ps)), rts)
     ax2.set_ylabel('Time(s)')
@@ -66,7 +73,10 @@ def plot_finish_time(l, ts):
 
 def plot_num_task(l, ts):
     setup_mpl()
-    plt.ylabel('Number of finished tasks')
+    fig = plt.figure()
+    fig.canvas.set_window_title("Tasks completed by time")
+    plt.ylabel('Tasks completed')
+    plt.xlabel("Time (s)")
 
     ps = sorted(l, key=lambda x: x[3])
     xs = [x[3] for x in ps]
@@ -78,25 +88,29 @@ def plot_num_task(l, ts):
     plt.show()
 
 
-def state_each_time(path):
-    with open(path) as f:
-        data = json.load(f)
-
+def state_each_time(files):
     points = {}
-    for k, v in data.items():
-        task_type = k.split("-")[0]
-        for service_type, rt in v.iteritems():
-            t = "%s@%s" % (task_type, service_type)
-            if t not in points:
-                points[t] = [rt]
-            else:
-                points[t].append(rt)
+
+    for path in files:
+        with open(path) as f:
+            data = json.load(f)
+
+        for k, v in data.items():
+            task_type = k.split("-")[0]
+            for service_type, rt in v.iteritems():
+                t = "%s@%s" % (task_type, service_type)
+                if t not in points:
+                    points[t] = [rt]
+                else:
+                    points[t].append(rt)
+
     plot_stat(points)
 
 
 def plot_stat(points):
     setup_mpl()
     fig, ax = plt.subplots()
+    fig.canvas.set_window_title("RT of tasks on services.")
     plt.xlabel('Time(s)')
     ax.set_xscale('log')
 
@@ -115,5 +129,6 @@ def plot_stat(points):
 
 
 if __name__ == '__main__':
-    state_finish_time("test/MoWSC/mowsc_exp.run")
-    state_each_time("test/MoWSC/mowsc_exp.time")
+    # state_finish_time("test/MoWSC/mowsc_exp.run")
+    # state_finish_time("test/MoWSC/mowsc_exp.run.local")
+    state_each_time(["test/MoWSC/mowsc_exp.time", "test/MoWSC/mowsc_exp.time.local"])

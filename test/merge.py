@@ -1,9 +1,14 @@
+import os
+import sh
+
 from Brick import Workflow
 from Brick.engine import SingleEngine
 from Brick.provider.local import ProcessProvider
-import sh, os
 
-dirs = filter(os.path.exists, os.environ["PATH"].split(":"))
+# dirs = filter(os.path.exists, os.environ["PATH"].split(":"))
+PATH = "/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
+dirs = filter(os.path.exists, PATH.split(":"))
+
 
 @SingleEngine(ProcessProvider())
 def merge(dirs):
