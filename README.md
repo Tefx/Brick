@@ -25,8 +25,6 @@ from Brick.engine import SingleEngine
 from Brick.provider.local import ProcessProvider
 import sh, os
 
-dirs = filter(os.path.exists, os.environ["PATH"].split(":"))
-
 @SingleEngine(ProcessProvider())
 def merge(dirs):
     w = Workflow()
@@ -44,11 +42,12 @@ def merge(dirs):
     bin_files = [my_ls(i, d) for i, d in enumerate(dirs)]
     return my_cat(bin_files)
 
+
+dirs = filter(os.path.exists, os.environ["PATH"].split(":"))
 for line in merge(dirs).splitlines():
     if "brick" in line:
         print line
 ```
-
 
 Brick can automatically generate dot file of the application's DAG, like
 
@@ -79,7 +78,7 @@ It can then run as normal Python program:
 
 ![RUN](test/doc_data/run.png)
 
-Also, one can get the runtime information of each task in file "merge.run" and "merge.time" after the execution.
+Also, one can get the runtime information of each task in files `merge.run` and `merge.time` after the execution.
 
 # Gallery
 
