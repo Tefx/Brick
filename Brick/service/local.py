@@ -1,8 +1,7 @@
 import gevent
-from gevent import socket
-
 import gipc
 import sh
+from gevent import socket
 
 from Brick.sockserver import SockServer, SockClient
 from Brick.worker import Puppet
@@ -47,16 +46,14 @@ class LXCService(ServiceBase):
 
     def get_ip(self, nic="eth0"):
         info = sh.lxc.info(self.name)
-        port = None
         if nic in info:
             for line in sh.lxc.info(self.name).splitlines():
                 if nic in line:
-                    port = line.split()[-2]
-                    break
-            return port
-        else:
-            gevent.sleep(1)
-            return self.get_ip(nic)
+                    groups = line.strip().split()
+                    if len(groups) > 3 and "inet" == groups[1]:
+                        return groups[2]
+        gevent.sleep(0.5)
+        return self.get_ip(nic)
 
     def real_start(self):
         sh.lxc.launch(self.image, self.name, p=self.conf)
