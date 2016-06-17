@@ -5,7 +5,8 @@ from Brick.provider import local
 from Brick.workflow import Workflow
 
 
-@LimitEngine(local.LXCProvider(), 4)
+# @LimitEngine(local.LXCProvider(), 4)
+@LimitEngine(local.ProcessProvider(), 4)
 def test_mapper(a, n):
     w = Workflow()
 

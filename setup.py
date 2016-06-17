@@ -1,6 +1,6 @@
 from setuptools import setup, find_packages
 
-requires = ["gevent", "sh", "python-snappy", "Husky", "tabulate", "gipc", "networkx", "decorator", "psutil"]
+
 console_scripts = ['brick-worker=Brick.worker:run_worker',
                    'brick-test-worker=Brick.worker:test_worker',
                    'brick-ls=Brick.tools:list_status',
@@ -15,6 +15,6 @@ setup(
         author='Zhaomeng Zhu',
         author_email='zhaomeng.zhu@gmail.com',
         description='scripting and running scientific workflows in Python',
-        install_requires=["gevent", "sh", "python-snappy", "Husky", "tabulate", "gipc", "networkx"],
+    install_requires=["gevent", "sh", "python-snappy", "Husky", "tabulate", "gipc", "networkx", "decorator", "psutil"],
         entry_points=dict(console_scripts=console_scripts)
 )
