@@ -1,5 +1,5 @@
 # Brick
-scripting and running scientific workflows in Python.
+Scripting and executing scientific workflows in Python.
 
 Brick supports processes/containers/VMs as environments, and supports local machine, cluster, IaaS and CaaS as service provider.
 
