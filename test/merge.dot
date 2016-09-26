@@ -1,0 +1,8 @@
+digraph {
+    "my_ls-[1]"->"my_cat-[7]"
+    "my_ls-[2]"->"my_cat-[7]"
+    "my_ls-[3]"->"my_cat-[7]"
+    "my_ls-[4]"->"my_cat-[7]"
+    "my_ls-[5]"->"my_cat-[7]"
+    "my_ls-[6]"->"my_cat-[7]"
+}
